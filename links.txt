@@ -1,0 +1,16 @@
+Routing
+
+https://www.curiousalgorithm.com/blog
+https://davidgarywood.com/swiftui-router-pattern-2-0
+https://canopas.github.io/UIPilot
+https://github.com/frzi/SwiftUIRouter
+https://blorenzop.medium.com/routing-navigation-in-swiftui-f1f8ff818937
+https://betterprogramming.pub/routing-in-swiftui-with-navigationstack-aa8bb9b032de
+
+UIKit integration
+https://www.avanderlee.com/swiftui/integrating-swiftui-with-uikit/
+https://www.swiftbysundell.com/articles/swiftui-and-uikit-interoperability-part-1
+https://swapnanildhol.blog/blog/tech/2022-06-11-iOS-swiftui-with-uikit-22
+
+Geometry effect
+https://swiftui-lab.com/matchedgeometryeffect-part1

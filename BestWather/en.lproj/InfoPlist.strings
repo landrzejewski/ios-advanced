@@ -1,0 +1,9 @@
+/* 
+  Info.strings
+  GoodWeather
+
+  Created by Łukasz Andrzejewski on 02/06/2023.
+  
+*/
+
+"NSLocationWhenInUseUsageDescription" = "Location is needed for forecast refresh";

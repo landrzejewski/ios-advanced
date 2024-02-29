@@ -1,0 +1,10 @@
+/* 
+  Localizable.strings
+  GoodWeather
+
+  Created by Łukasz Andrzejewski on 02/06/2023.
+  
+*/
+
+"first-name" = "First name";
+"last-name" = "Last name";
