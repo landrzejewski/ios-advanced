@@ -15,7 +15,7 @@ struct ProfileView: View {
     @State var showImagePicker = false
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 ZStack {
                     if profileImage != nil {

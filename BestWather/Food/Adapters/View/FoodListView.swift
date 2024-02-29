@@ -14,7 +14,7 @@ struct FoodListView: View {
     @Injected(\.orderViewModel) var orderViewModel: OrderViewModel
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 List(viewModel.food) { food in
                     FoodView(viewModel: food)
