@@ -48,7 +48,7 @@ struct Fruits: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 50, height: 36)
-                        //.scaleEffect(2)
+                        .scaleEffect(2)
                         .matchedGeometryEffect(id: selectedItem.id, in: namespace)
                     Button(action: {
                         withAnimation(.easeInOut(duration: 0.6)) {

@@ -115,6 +115,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		80C1014D2B91F7CB00A27546 /* Threads.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Threads.playground; sourceTree = "<group>"; };
 		B25A826E2B56A3F6003319E6 /* data.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = data.txt; sourceTree = "<group>"; };
 		B25A82712B56A6F5003319E6 /* ImagePickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagePickerView.swift; sourceTree = "<group>"; };
 		B25A82722B56A6F5003319E6 /* ImagePickerCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagePickerCoordinator.swift; sourceTree = "<group>"; };
@@ -347,6 +348,7 @@
 		B270FF782B553472003297AB = {
 			isa = PBXGroup;
 			children = (
+				80C1014D2B91F7CB00A27546 /* Threads.playground */,
 				B270FFEB2B5588F7003297AB /* links.txt */,
 				B25A826E2B56A3F6003319E6 /* data.txt */,
 				B25A828B2B56CE85003319E6 /* data.json */,
