@@ -2,7 +2,7 @@ import PlaygroundSupport
 import Foundation
 import CoreLocation
 
-let url = URL(string: "https://raw.githubusercontent.com/landrzejewski/goodweather/combine/data.json")!
+let url = URL(string: "https://raw.githubusercontent.com/landrzejewski/bestweather-ios/main/data.json")!
 
 /*
  Awaiting the async function pauses current execution and frees up the thread (it can be utilized for some other work). Once the async task is completed our original function can continue (not necessarily in the original thread). A regular function must be executed in one go, building up and unwinding its call stack uninterrupted, an asynchronous function does not have this limitation. It’s possible for Swift to take the call stack for an async function and put it aside for a while
