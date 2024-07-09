@@ -5,25 +5,22 @@ import Foundation
  Operation type represents a task to execute.
  
  Operation possible states (lifecycle):
- isReady - task is created and ready to run
- isExecuting - start method was called
- isCancelled - cancel method was called
- isFinished - task ended (normally or as a result of cancellation)
+   isReady - task is created and ready to run
+   isExecuting - start method was called
+   isCancelled - cancel method was called
+   isFinished - task ended (normally or as a result of cancellation)
  */
 
 // BlockOperation run tasks concurrently, acts similar to a dispatch group in that it marks itself as being finished when all of the closures have finished
 
+/*
 let operation = BlockOperation {
-    print("1 + 1 = 2")
-}
-
-operation.addExecutionBlock {
-    print("1 + 2 = 3")
+    print("Task")
 }
 
 operation.addExecutionBlock {
     Thread.sleep(forTimeInterval: 4)
-    print("1 + 3 = 4")
+    print("Other task")
 }
 
 operation.completionBlock = {
@@ -32,10 +29,12 @@ operation.completionBlock = {
 
 operation.start() // runs operations synchronous
 print("After operation")
+*/
 
 // OperationQueue accepts an Operation instance, an array of Operation instances, or a closure
 // Operation instance can be used/run only once
 
+/*
 let operationQueue = OperationQueue()
 
 class DownloadImage: Operation {
@@ -46,16 +45,18 @@ class DownloadImage: Operation {
     
 }
 
-let downloadingImage = DownloadImage()
-downloadingImage.qualityOfService = .userInitiated // Can change OperationQueue quality of service
-downloadingImage.completionBlock = {
-    print("Image downloaded")
+let task = DownloadImage()
+task.qualityOfService = .userInitiated
+task.completionBlock = {
+    print("Operation completed")
 }
 
-operationQueue.addOperation(downloadingImage)
+operationQueue.addOperation(task)
+print("After operation")
+*/
 
-// downloadingImage.addDependency(someOperation) // specifies operation dependency, all dependencies are available through the dependencies property
-// downloadingImage.cancel() // only sets the isCancelled property to true, task/operation is not automatically interrupted. Cancelled operation will not start
+// task.addDependency(someOperation) // specifies operation dependency, all dependencies are available through the dependencies property
+// task.cancel() // only sets the isCancelled property to true, task/operation is not automatically interrupted. Cancelled operation will not start
 
 // operationQueue.underlyingQueue = DispatchQueue(label: "pl.training.concurrent", attributes: .concurrent)
 // operationQueue.addOperations([Operation], waitUntilFinished: true)
@@ -64,6 +65,7 @@ operationQueue.addOperation(downloadingImage)
 // operationQueue.maxConcurrentOperationCount = 2 // limits the number of operations which are running at a single time
 // operationQueue.cancelAllOperations()
 
+/*
 class AsyncOperation: Operation {
     
     private let lockQueue = DispatchQueue(label: "pl.training.async", attributes: .concurrent)
@@ -134,6 +136,6 @@ class AsyncOperation: Operation {
 
 let asyncOperation = AsyncOperation()
 operationQueue.addOperations([asyncOperation], waitUntilFinished: true)
-
+*/
 
 PlaygroundPage.current.needsIndefiniteExecution = true

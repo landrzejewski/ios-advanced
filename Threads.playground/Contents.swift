@@ -16,42 +16,51 @@ import Foundation
  .utility - for long-running computations, I/O, networking or continuous data feeds. The system tries to balance responsiveness and performance with energy efficiency
  .background - for tasks that the user is not directly aware. They don’t require user interaction and aren’t time sensitive. Prefetching, database maintenance, synchronizing remote servers and performing backups are all great examples. The OS will focus on energy efficiency instead of speed
  .default and .unspecified - should not use explicitly. There’s a .default option, which falls between .userInitiated and .utility and is the default value of the qos argument. It’s not intended for you to directly use. The .unspecified option exists to support legacy APIs
- 
  */
 
-let serialQueue = DispatchQueue(label: "ol.training.serial")
+let globalQueue = DispatchQueue.global(qos: .userInitiated)
+let serialQueue = DispatchQueue(label: "pl.training.serial")
 let concurrentQueue = DispatchQueue(label: "pl.training.concurrent", attributes: .concurrent)
-let qlobalQueue = DispatchQueue.global(qos: .userInteractive) // concurrent
-let customConcurrentQueue = DispatchQueue(label: "pl.training.concurrent.custom", qos: .userInitiated, attributes: .concurrent) // Quality of service can be changed by system when submitting tasks with different qos value
+let otherConcurrentQueue = DispatchQueue(label: "pl.training.otherConcurrent", qos: .userInitiated, attributes: .concurrent) // Quality of service can be changed by system when submitting tasks with different qos value
 
-// Submitting task to synchronous queue can be potentially dangerous (main thread blocking, deadlocks)
+// Submitting task using sync can be potentially dangerous (main thread blocking, deadlocks)
+
+/*
 concurrentQueue.sync {
     Thread.sleep(forTimeInterval: 1)
-    print("Background task")
+    print("Backgroud task \(Thread.current)")
 }
-print("After task") // sync (after task complition)
+print("After backgroud task \(Thread.current)") // after task complition
+*/
 
+/*
 concurrentQueue.async {
     Thread.sleep(forTimeInterval: 1)
-    print("Background task")
+    print("Backgroud task \(Thread.current)")
 }
-print("After task")
+print("After task \(Thread.current)")
+*/
 
 // Instead of using lambda, the task can be submitted as DispatchWorkItem instance. This allows cancellation of the task or notification of another DispatchWorkItem that it should be executed after the current task completes
 
+/*
 let task = DispatchWorkItem {
+    Thread.sleep(forTimeInterval: 1)
     print("Task")
 }
 
 let otherTask = DispatchWorkItem {
-    print("Other Task")
+    print("Other task")
 }
 
 task.notify(queue: .main, execute: otherTask)
 
 concurrentQueue.async(execute: task)
+*/
 
 // Runs task on UI thread
+
+/*
 DispatchQueue.main.async {
     print("UI task")
 }
@@ -67,161 +76,148 @@ func onMainThread(closure: @escaping () -> ()) {
 onMainThread {
     print("UI task")
 }
+*/
+
 
 // DispatchGroup allows to track the completion of a group of tasks
 
+/*
+ let group = DispatchGroup()
+ 
+ concurrentQueue.async(group: group) {
+    Thread.sleep(forTimeInterval: 60)
+    print("Background task")
+ }
+ 
+ serialQueue.async(group: group) {
+    print("Other background task")
+ }
+ 
+ if group.wait(timeout: .now() + 5) == .timedOut {
+    print("The jobs didn't finished in expected time")
+ } else {
+    print("The jobs finised in expected time")
+ }
+*/
+
+// In the case of nested asynchronous tasks, the programmer should indicate their completion so that it is clear when the main task should end
+
+/*
 let group = DispatchGroup()
 
 concurrentQueue.async(group: group) {
-    print("Background async task")
-}
-
-serialQueue.async(group: group) {
-    Thread.sleep(forTimeInterval: 10)
-    print("Background async task")
-}
-
-//if group.wait(timeout: .now() + 60) == .timedOut {
-//    print("The jobs didn't finished in 60 seconds")
-//} else {
-//    print("The jobs finished in 60 seconds")
-//}
-
-// In the case of nested asynchronous tasks, the programmer should indicate their completion so that it is clear when the main task should end
-concurrentQueue.async(group: group) {
-    print("Task")
-    group.enter()
-    concurrentQueue.async {
-        Thread.sleep(forTimeInterval: 1)
-        print("Inner Task")
-        group.leave()
+    print("Background task")
+    //group.enter()
+    concurrentQueue.async(group: group) {
+        Thread.sleep(forTimeInterval: 5)
+        print("Inner cackground task")
+        //group.leave()
     }
 }
 
 group.notify(queue: .main) {
     print("All jobs completed")
 }
+*/
 
 // DispatchSemaphore allows to control how many threads have access to a shared resource
+
+/*
 let semaphore = DispatchSemaphore(value: 2)
 
 for i in 1...5 {
     concurrentQueue.async {
         defer { semaphore.signal() }
         semaphore.wait()
+        print("Before background task \(i)")
         Thread.sleep(forTimeInterval: 5)
-        print("Image \(i) downloaded")
+        print("Background task \(i)")
     }
 }
+*/
 
-class Cache<Key: Hashable, T> {
-    
-  private var cache: [Key: T] = [:]
-  private let semaphore = DispatchSemaphore(value: 1)
 
-  func getValue(forKey key: Key) -> T? {
-    semaphore.wait()
-    let value = cache[key]
-    semaphore.signal()
-    return value
-  }
+class Cache<Key: Hashable, Value> {
     
-  func setValue(_ value: T, forKey key: Key) {
-    semaphore.wait()
-    cache[key] = value
-    semaphore.signal()
-  }
+    private var cache: [Key: Value] = [:]
+    // private let semaphore = DispatchSemaphore(value: 1)
     
-}
-
-class Cache2<Key: Hashable, T> {
-  
-  private var cache: [Key: T] = [:]
-  private let lock = NSLock()
+    // private let lock = NSLock()
     
-  func getValue(forKey key: Key) -> T? {
-    lock.lock()
-    let value = cache[key]
-    lock.unlock()
-    return value
-  }
+    // private let serialQueue = DispatchQueue(label: "pl.traing.internalCacheQueue") // Synchronization using serial queue, can lead to thread explosion
+   
+    private let concurrentQueue = DispatchQueue(label: "pl.traing.internalCacheQueue", attributes: .concurrent)
     
-  func setValue(_ value: T, forKey key: Key) {
-    lock.lock()
-    cache[key] = value
-    lock.unlock()
-  }
-    
-}
-
-// Synchronization using serial queue, can lead to thread explosion)
-class Counter {
-    
-    private let queue = DispatchQueue(label: "pl.training.internalQueue")
-    private var _value = 0
-    
-    var value: Int {
-        queue.sync { _value }
+    func getValue(forKey key: Key) -> Value? {
+        // defer { semaphore.signal() }
+        // semaphore.wait()
+   
+        
+        // defer { lock.unlock() }
+        // lock.lock()
+   
+        // return serialQueue.sync { cache[key] }
+        
+        return concurrentQueue.sync { cache[key] }
     }
     
-    static func += (left: Counter, right: Int)  {
-        left.increment(amount: right)
-    }
-    
-    static func -= (left: Counter, right: Int)  {
-        left.decrement(amount: right)
-    }
-    
-    func increment(amount: Int = 1) -> Int {
-        return queue.sync {
-            _value += amount
-            return _value
-        }
-    }
-    
-    func decrement(amount: Int = 1) -> Int {
-        return queue.sync {
-            _value -= amount
-            return _value
-        }
-    }
-}
-
-var counter = Counter()
-DispatchQueue.concurrentPerform(iterations: 10_000) { _ in
-    counter += 1
-}
-print(counter.value)
-
-// Synchronization using dispatch barrier (equivalent to read/write locks)
-// Once the barrier hits, the queue pretends that it’s serial and only the barrier task can run until completion. Once it completes, all tasks that were submitted after the barrier task can again run concurrently
-class Articles {
-    
-    private let queue = DispatchQueue(label: "pl.training.internalBarrierQueue", attributes: .concurrent) // queue should be concurrent
-    private var _articles: [String] = []
-    
-    var articles: [String] {
-        var copied: [String] = []
-        queue.sync {
-            copied = _articles
-        }
-        return copied
-    }
-    
-    func add(article: String) {
-        queue.sync(flags: .barrier) { [weak self] in // modification requires .barrier flag (task won’t occur until all of the previous reads have completed)
-            self?._articles.append(article)
-        }
-    }
-    
-    func remove(at index: Int) -> String? {
-        var removed: String? = nil
-        queue.sync(flags: .barrier) { [weak self] in // modification requires .barrier flag
-            removed = self?._articles.remove(at: index)
-        }
-        return removed
+    func setValue(_ value: Value, forKey key: Key) {
+        // semaphore.wait()
+        // lock.lock()
+   
+        // cache[key] = value
+       
+        // semaphore.signal()
+        // lock.unlock()
+        
+       // serialQueue.sync { cache[key] = value }
+        
+        concurrentQueue.sync(flags: .barrier) { cache[key] = value } // modification requires .barrier flag (task won’t occur until all of the previous reads have completed)
     }
     
 }
 
 PlaygroundPage.current.needsIndefiniteExecution = true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+https://en.wikipedia.org/wiki/Sleeping_barber_problem
+
+This is a simple demonstration of how to solve the Sleeping Barber dilemma, a classic computer science problem
+which illustrates the complexities that arise when there are multiple operating system processes. Here, we have
+a finite number of barbers, a finite number of seats in a waiting room, a fixed length of time the barbershop is
+open, and clients arriving at (roughly) regular intervals. When a barber has nothing to do, he or she checks the
+waiting room for new clients, and if one or more is there, a haircut takes place. Otherwise, the barber goes to
+sleep until a new client arrives. So the rules are as follows:
+
+  - if there are no customers, the barber falls asleep in the chair
+  - a customer must wake the barber if he is asleepf a customer arrives while the barber is working, t
+  - ihe customer leaves if all chairs are occupied and sits in an empty chair if it's available
+  - when the barber finishes a haircut, he inspects the waiting room to see if there are any waiting customers and falls asleep if there are none
+  - shop can stop accepting new clients at closing time, but the barbers cannot leave until the waiting room isempty
+  - after the shop is closed and there are no clients left in the waiting area, the barber goes home
+
+ The Sleeping Barber was originally proposed in 1965 by computer science pioneer Edsger Dijkstra.
+*/
