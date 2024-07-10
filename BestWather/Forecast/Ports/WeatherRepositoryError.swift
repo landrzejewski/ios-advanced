@@ -10,5 +10,6 @@ import Foundation
 enum WeatherRepositoryError: Error {
     
     case operationFailed
+    case noData
     
 }

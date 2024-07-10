@@ -25,18 +25,18 @@ extension Container {
         self { OpenWeatherProviderAdapter(provider: self.openWeatherProvider()) }.singleton
     }
     
-//    var persistence: Factory<Persistence> {
-//        self { Persistence() }.singleton
-//    }
+    var persistence: Factory<Persistence> {
+        self { Persistence() }.singleton
+    }
     
     var weatherRepository: Factory<WeatherRepository> {
-        self { try! SqlWeatherRepository() }.singleton
-        // self { CoreDataWeatherRepository(persistence: self.persistence()) }
+        //self { try! SqlWeatherRepository() }.singleton
+        self { CoreDataWeatherRepository(persistence: self.persistence()) }
     }
     
     var forecastService: Factory<ForecastService> {
-        let proxy = WeatherProviderLoggerProxy(provider: self.openWeatherProviderAdapter())
-        return self { ForecastService(weatherProvider: self.fakeWeatherProvider() , weatherRepository: self.weatherRepository()) }.singleton
+        _ = WeatherProviderLoggerProxy(provider: self.openWeatherProviderAdapter())
+        return self { ForecastService(weatherProvider: self.openWeatherProviderAdapter() , weatherRepository: self.weatherRepository()) }.singleton
     }
     
     var forecastViewModel: Factory<ForecastViewModel> {
