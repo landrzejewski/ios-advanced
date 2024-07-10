@@ -44,5 +44,13 @@ final class CoreLocationService: NSObject, CLLocationManagerDelegate, LocationSe
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         refreshLocation()
     }
+    
+    func startUpdatingLocation() -> AsyncPublisher<AnyPublisher<(Double, Double), Never>> {
+        // requestPermissionIfNeeded()
+        locationManager.startUpdatingLocation()
+        return subject
+           .eraseToAnyPublisher()
+           .values  // returns sequence that allows iteration/access for many clients
+    }
  
 }
