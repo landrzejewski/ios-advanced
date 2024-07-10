@@ -260,6 +260,38 @@ class Search: ObservableObject {
             .replaceError(with: [])
             .receive(on: DispatchQueue.main)
             .assign(to: &$results)
+ 
+        /*
+        $searchText
+            .debounce(for: 0.3, scheduler: DispatchQueue.main)
+            .flatMap { query in
+                Future { [weak self] promise in
+                    guard let self = self else {
+                    promise(.success([]))
+                    return
+                }
+             Task {
+                 do {
+                     let results = try await self.search(for: query)
+                     promise(.success(results)) }
+                 catch {
+                     // instead of failing, complete with empty result
+                     promise(.success([]))
+                 }
+             }
+         }
+         */
+     }
+     .receive(on: DispatchQueue.main)
+     .assign(to: &$results)
+
+    }
+ 
+    func search(for query: String) async throws -> [String] {
+        let url = URL(string: "https://raw.githubusercontent.com/landrzejewski/bestweather-ios/main/data.txt?q=\(query)")!
+        let (data, _) = try await URLSession.shared.data(from: url)
+        return try JSONDecoder()
+          .decode([String].self, from: data)
     }
     
 }
@@ -267,6 +299,22 @@ class Search: ObservableObject {
 let search = Search()
 search.searchText = "abc"
 search.searchText = "def"
+ 
+let result = search.$results
+result.sink {
+     print($0)
+}
+.store(in: &subscriptionSet)
+
+/*
+Task {
+  let results = try? await Search().search(for: "abc")
+  results?.forEach {
+    print($0)
+  }
+}
+*/
+ 
 */
 
 func emailValidator(_ email: AnyPublisher<String, Never>) -> AnyPublisher<String, Never> {
